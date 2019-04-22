@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">file_folder_selector</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+    <string name="create_folder">创建文件夹</string>
+    <string name="return_upper_directory">返回上层目录</string>
+    <string name="now_directory">当前路径：</string>
+</resources>
