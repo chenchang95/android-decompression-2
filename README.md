@@ -1,5 +1,9 @@
 # android-decompression-2
-安卓解压软件，自己做目录选择器
+安卓解压软件
+自定义目录选择器
+可解压zip和rar支持密码，但不能解压rar5
+能新建文件夹
+能删除文件和文件夹
 
 unrar需要依赖gnu-crypto.jar
 
