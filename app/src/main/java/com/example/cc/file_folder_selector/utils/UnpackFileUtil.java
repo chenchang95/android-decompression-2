@@ -63,7 +63,7 @@ public class UnpackFileUtil {
         try {
             fileArchive = new Archive(srcFile, password, false);
             int total = fileArchive.getFileHeaders().size();
-            Log.e("size", total+"");
+            if(total == 0) return "该压缩包为rar5，暂不支持";
             for (int i = 0; i < total; i++) {
                 FileHeader fh = fileArchive.getFileHeaders().get(i);
                 String entryPath = "";
