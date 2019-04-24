@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
@@ -26,6 +27,7 @@ import com.example.cc.file_folder_selector.model.FileModel;
 import com.example.cc.file_folder_selector.utils.FileAndFolderUtil;
 import com.example.cc.file_folder_selector.utils.UnpackFileUtil;
 
+import java.io.File;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
@@ -48,6 +50,11 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setTitle("解压软件");
+
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
+        builder.detectFileUriExposure();
+
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -85,26 +92,39 @@ public class MainActivity extends AppCompatActivity
         unpackInit();
     }
 
+    /**
+     * 解压初始化
+     */
     @SuppressLint("RestrictedApi")
     public void unpackInit(){
         Intent intent = getIntent();
         String action = intent.getAction();
         if(intent.ACTION_VIEW.equals(action) || restart) {
             restart = false;
-            FloatingActionButton fab = findViewById(R.id.fab);
-            fab.setVisibility(View.VISIBLE);
+            Uri uri = intent.getData();
+            compressedFile = Uri.decode(uri.getEncodedPath());
+            fileType = compressedFile.substring(compressedFile.lastIndexOf(".")+1, compressedFile.length());
+            if(fileType.equals("zip") || fileType.equals("rar")) {
+                FloatingActionButton fab = findViewById(R.id.fab);
+                fab.setVisibility(View.VISIBLE);
+            }else{
+                Toast.makeText(this,"该文件格式暂不支持",Toast.LENGTH_LONG).show();
+            }
         }
     }
 
+    /**
+     * 右下角悬浮按钮点击事件
+     * @param v
+     */
     public void decompressionFileClick(View v){
         unpackFile();
     }
 
+    /**
+     * 解压文件
+     */
     public void unpackFile(){
-        Intent intent = getIntent();
-        Uri uri = intent.getData();
-        compressedFile = Uri.decode(uri.getEncodedPath());
-        fileType = compressedFile.substring(compressedFile.lastIndexOf(".")+1, compressedFile.length());
         if(fileType.equalsIgnoreCase("zip")){
             String msg = UnpackFileUtil.unZip(compressedFile, basePath, null);
             Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
@@ -113,15 +133,13 @@ public class MainActivity extends AppCompatActivity
             String msg = UnpackFileUtil.unRar(compressedFile, basePath, null);
             Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
             changePath(basePath);
-        }else{
-            Toast.makeText(this,"该文件格式暂不支持",Toast.LENGTH_LONG).show();
         }
     }
 
-    public void lastFolderClick(View v){
-        lastFolder();
-    }
-
+    /**
+     * 返回上层目录
+     * @return
+     */
     public boolean lastFolder(){
         if(!basePath.equals(rootPathList.get(0))){
             basePath = basePath.substring(0, basePath.lastIndexOf("/"));
@@ -131,18 +149,30 @@ public class MainActivity extends AppCompatActivity
         return false;
     }
 
+    /**
+     * 点文件CheckBox点击事件
+     * @param v
+     */
     public void pointBeginFileClick(View v){
         CheckBox c = v.findViewById(R.id.point_begin_file);
         spotFlag = c.isChecked();
         changePath(basePath);
     }
 
+    /**
+     * 文件CheckBox点击事件
+     * @param v
+     */
     public void hideFileClick(View v){
         CheckBox c = v.findViewById(R.id.hide_file);
         fileFlag = c.isChecked();
         changePath(basePath);
     }
 
+    /**
+     * 排序CheckBox点击事件
+     * @param v
+     */
     public void orderFileClick(View v){
         CheckBox c = v.findViewById(R.id.order_file);
         orderByFlag = c.isChecked();
@@ -184,7 +214,26 @@ public class MainActivity extends AppCompatActivity
         FileModel fileModel = baseFileList.get((int) v.getTag());
         if(fileModel.isDirectory()){
             changePath(fileModel.getFilePath());
+        }else{
+            show(fileModel.getFilePath());
         }
+    }
+
+    //显示打开方式
+    public void show(String filesPath){
+        Intent intent = new Intent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setAction(Intent.ACTION_VIEW);
+        startActivity(showOpenTypeDialog(filesPath));
+    }
+
+    public static Intent showOpenTypeDialog(String param) {
+        Intent intent = new Intent();
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setAction(android.content.Intent.ACTION_VIEW);
+        Uri uri = Uri.fromFile(new File(param));
+        intent.setDataAndType(uri, "*/*");
+        return intent;
     }
 
     /**
@@ -196,6 +245,7 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
+            //把返回上层目录绑定到返回键
             if(!lastFolder()){
                 super.onBackPressed();
             }

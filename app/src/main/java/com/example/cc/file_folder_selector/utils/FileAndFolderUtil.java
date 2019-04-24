@@ -150,7 +150,6 @@ public class FileAndFolderUtil {
                 return f2.getFileName().compareTo(f1.getFileName());
             }
         });
-
     }
 
 }

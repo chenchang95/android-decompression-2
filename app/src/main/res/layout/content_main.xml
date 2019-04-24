@@ -12,21 +12,12 @@
         android:layout_width="match_parent"
         android:layout_height="60dp">
 
-        <ImageButton
-            android:id="@+id/last_folder"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/return_upper_directory"
-            android:onClick="lastFolderClick"
-            app:srcCompat="?android:attr/actionModeCloseDrawable" />
-
         <TextView
             android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="60dp"
-            android:layout_marginTop="5dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
             android:contentDescription="@string/now_directory"
             android:text="@string/now_directory"
             app:layout_constraintStart_toStartOf="parent"
@@ -35,10 +26,12 @@
 
         <TextView
             android:id="@+id/now_path"
-            android:layout_width="160dp"
+            android:layout_width="match_parent"
             android:layout_height="20dp"
-            android:layout_marginStart="60dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="36dp"
+            android:ellipsize="start"
+            android:singleLine="true"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -47,24 +40,24 @@
             style="@style/Widget.AppCompat.CompoundButton.CheckBox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="218dp"
+            android:layout_marginStart="249dp"
             android:checked="false"
+            android:onClick="pointBeginFileClick"
             android:shadowColor="@color/colorPrimary"
             android:text="点开头"
             android:textAllCaps="false"
             android:textColorLink="@color/colorPrimary"
-            android:onClick="pointBeginFileClick"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <CheckBox
             android:id="@+id/hide_file"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="218dp"
-            android:layout_marginTop="23dp"
+            android:layout_marginStart="188dp"
             android:checked="true"
-            android:text="文件"
             android:onClick="hideFileClick"
+            android:text="文件"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -72,10 +65,11 @@
             android:id="@+id/order_file"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="300dp"
-            android:text="排序"
+            android:layout_marginStart="324dp"
             android:onClick="orderFileClick"
-            app:layout_constraintStart_toStartOf="parent" />
+            android:text="排序"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </android.support.constraint.ConstraintLayout>
 
