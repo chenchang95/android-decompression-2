@@ -1,13 +1,13 @@
 package com.example.cc.file_folder_selector;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.util.Log;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -18,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,7 +32,7 @@ import java.io.File;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,View.OnClickListener {
+        implements NavigationView.OnNavigationItemSelectedListener,View.OnClickListener,View.OnLongClickListener {
 
     //需解压文件路径
     private static String compressedFile;
@@ -118,22 +119,85 @@ public class MainActivity extends AppCompatActivity
      * @param v
      */
     public void decompressionFileClick(View v){
-        unpackFile();
+        unpackFileCheck();
     }
 
     /**
      * 解压文件
      */
-    public void unpackFile(){
+    public void unpackFileCheck(){
         if(fileType.equalsIgnoreCase("zip")){
-            String msg = UnpackFileUtil.unZip(compressedFile, basePath, null);
-            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
-            changePath(basePath);
+            if(UnpackFileUtil.needPassword(compressedFile, "zip")){
+                showInputBox("请输入密码","zip");
+            }else{
+                unpackFile("zip", null);
+            }
         }else if(fileType.equalsIgnoreCase("rar")){
-            String msg = UnpackFileUtil.unRar(compressedFile, basePath, null);
-            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
-            changePath(basePath);
+            if(UnpackFileUtil.unRar(compressedFile, basePath, null).equals("解压失败")){
+                showInputBox("请输入密码","rar");
+            }else{
+                unpackFile("rar", null);
+            }
         }
+    }
+
+    /**
+     * 解压文件
+     * @param fileType
+     * @param password
+     */
+    public void unpackFile(String fileType, String password){
+        String msg = "解压中...";
+        if(fileType.equals("zip")){
+            msg = UnpackFileUtil.unZip(compressedFile, basePath, password);
+        }else if(fileType.equals("rar")){
+            msg = UnpackFileUtil.unRar(compressedFile, basePath, password);
+        }
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+        changePath(basePath);
+    }
+
+    /**
+     * 弹出输入框
+     * @param title
+     * @param type
+     */
+    public void showInputBox(String title, final String type){
+        final EditText inputServer = new EditText(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title).setView(inputServer);
+        builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                if(type.equals("zip")){
+                    unpackFile("zip", inputServer.getText().toString());
+                }else if(type.equals("rar")){
+                    unpackFile("rar", inputServer.getText().toString());
+                }else if(type.equals("createFolder")){
+                    String folderPath = basePath +"/"+ inputServer.getText().toString();
+                    File folder = new File(folderPath);
+                    if(!folder.exists()){
+                        folder.mkdir();
+                        changePath(basePath);
+                    }
+                }
+            }
+        });
+        builder.show();
+    }
+
+    public void showTipsBox(String title, String content, final FileModel fileModel){
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(content)
+            .setPositiveButton("确定", new DialogInterface.OnClickListener() {//添加"Yes"按钮
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    FileAndFolderUtil.deleteDirWithFile(new File(fileModel.getFilePath()));
+                    changePath(basePath);
+                }
+            })
+            .create();
+        alertDialog.show();
     }
 
     /**
@@ -219,6 +283,18 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public boolean onLongClick(View v) {
+        //v.getTag()  为当前选中的下标
+        FileModel fileModel = baseFileList.get((int) v.getTag());
+        if(fileModel.isDirectory()){
+            showTipsBox("提示", "你确定要删除该文件吗？", fileModel);
+        }else{
+            showTipsBox("提示", "你确定要删除该文件吗？", fileModel);
+        }
+        return false;
+    }
+
     //显示打开方式
     public void show(String filesPath){
         Intent intent = new Intent();
@@ -269,7 +345,7 @@ public class MainActivity extends AppCompatActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.create_folder) {
-            Log.v("msg", "点击了创建文件夹");
+            showInputBox("请输入文件夹名称", "createFolder");
             return true;
         }
 

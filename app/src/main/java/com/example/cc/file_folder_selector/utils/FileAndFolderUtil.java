@@ -1,7 +1,6 @@
 package com.example.cc.file_folder_selector.utils;
 
 import android.os.Environment;
-import android.util.Log;
 
 import com.example.cc.file_folder_selector.model.FileModel;
 
@@ -13,14 +12,31 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 文件/文件夹工具类
  */
 public class FileAndFolderUtil {
+
+    /**
+     * 删除文件或文件夹
+     * @param dir
+     */
+    public static void deleteDirWithFile(File dir) {
+        if (dir == null || !dir.exists())
+            return;
+        if(!dir.isDirectory()){//不是目录
+            dir.delete(); return;
+        }
+        for (File file : dir.listFiles()) {
+            if (file.isFile())
+                file.delete(); // 删除所有文件
+            else if (file.isDirectory())
+                deleteDirWithFile(file); // 递规的方式删除文件夹
+        }
+        dir.delete();// 删除目录本身
+    }
 
     /**
      * 获取外置SD卡和扩展存储卡TF卡路径

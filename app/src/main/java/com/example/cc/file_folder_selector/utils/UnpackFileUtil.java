@@ -14,6 +14,22 @@ import de.innosystec.unrar.rarfile.FileHeader;
 public class UnpackFileUtil {
 
     /**
+     * 判断是否需要密码
+     */
+    public static boolean needPassword(String srcPath, String fileType){
+        if(fileType == null) return false;
+        try{
+            if(fileType.equals("zip")){
+                ZipFile zf = new ZipFile(new File(srcPath));
+                return zf.isEncrypted();
+            }
+        }catch (Exception e){
+            Log.e("needPassword", e.getLocalizedMessage());
+        }
+        return false;
+    }
+
+    /**
      * 解压zip
      */
     public static String unZip(String srcPath, String destPath, String password){
@@ -37,7 +53,7 @@ public class UnpackFileUtil {
     /**
      * 解压rar
      */
-    public static String unRar(String srcPath, String destPath, String password){
+    public static String unRar(String srcPath, String destPath, String password) {
         if(!destPath.endsWith("/")){
             destPath = destPath + "/";
         }
@@ -47,6 +63,7 @@ public class UnpackFileUtil {
         try {
             fileArchive = new Archive(srcFile, password, false);
             int total = fileArchive.getFileHeaders().size();
+            Log.e("size", total+"");
             for (int i = 0; i < total; i++) {
                 FileHeader fh = fileArchive.getFileHeaders().get(i);
                 String entryPath = "";
@@ -56,7 +73,6 @@ public class UnpackFileUtil {
                     entryPath = fh.getFileNameString().trim();
                 }
                 entryPath = entryPath.replaceAll("\\\\", "/");
-                Log.e("---------",destPath + entryPath);
                 File file = new File(destPath + entryPath);
                 if (fh.isDirectory()) {
                     file.mkdirs();
@@ -73,7 +89,7 @@ public class UnpackFileUtil {
             }
             return "解压成功";
         } catch (Exception e){
-            return e.getMessage();
+            return "解压失败";
         } finally {
             try {
                 if (fileOut != null) {

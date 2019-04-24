@@ -51,6 +51,7 @@ public class FileItemAdaptor extends BaseAdapter implements View.OnClickListener
         fileNameView.setText(fileModel.getFileName());
         view.setTag(i);
         view.setOnClickListener(listener);
+        view.setOnLongClickListener(listener);
         return view;
     }
 
